@@ -11,10 +11,10 @@ class BarberApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Barber Shop',
+      title: 'Barbería',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
         useMaterial3: true,
       ),
       home: const BarberHomePage(),
@@ -31,16 +31,24 @@ class BarberHomePage extends StatefulWidget {
 
 class _BarberHomePageState extends State<BarberHomePage> {
   final List<String> services = [
-    'Haircut',
-    'Shave',
-    'Beard Trim',
-    'Hair Wash',
-    'Styling',
+    'Corte de Pelo',
+    'Afeitado',
+    'Corte de Barba',
+    'Lavado de Pelo',
+    'Peinado',
+  ];
+
+  final List<String> barbers = [
+    'Juan',
+    'Miguel',
+    'Carlos',
+    'Luis',
   ];
 
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String? selectedService;
+  String? selectedBarber;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -69,11 +77,11 @@ class _BarberHomePageState extends State<BarberHomePage> {
   }
 
   void _bookAppointment() {
-    if (selectedDate != null && selectedTime != null && selectedService != null) {
+    if (selectedDate != null && selectedTime != null && selectedService != null && selectedBarber != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Appointment booked for ${DateFormat('yyyy-MM-dd').format(selectedDate!)} at ${selectedTime!.format(context)} for $selectedService',
+            'Cita reservada para $selectedService con $selectedBarber el ${DateFormat('yyyy-MM-dd').format(selectedDate!)} a las ${selectedTime!.format(context)}',
           ),
         ),
       );
@@ -82,11 +90,12 @@ class _BarberHomePageState extends State<BarberHomePage> {
         selectedDate = null;
         selectedTime = null;
         selectedService = null;
+        selectedBarber = null;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select date, time, and service'),
+          content: Text('Por favor, seleccione barbero, servicio, fecha y hora'),
         ),
       );
     }
@@ -96,88 +105,125 @@ class _BarberHomePageState extends State<BarberHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barber Shop'),
+        title: const Text('Reservas de Barbería'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Welcome to Our Barber Shop',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Book Your Appointment',
-              style: TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 16),
-            // Service Selection
-            const Text('Select Service:'),
-            DropdownButton<String>(
-              value: selectedService,
-              hint: const Text('Choose a service'),
-              isExpanded: true,
-              items: services.map((String service) {
-                return DropdownMenuItem<String>(
-                  value: service,
-                  child: Text(service),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedService = newValue;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            // Date Selection
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    selectedDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _selectDate(context),
-                  child: const Text('Pick Date'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Time Selection
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    selectedTime == null
-                        ? 'Select Time'
-                        : selectedTime!.format(context),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _selectTime(context),
-                  child: const Text('Pick Time'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Center(
-              child: ElevatedButton(
-                onPressed: _bookAppointment,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                child: const Text('Book Appointment'),
+        child: SingleChildScrollView( // Added to prevent overflow
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Bienvenido a Nuestra Barbería',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              const Text(
+                'Reserve su Cita',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 24),
+
+              // Barber Selection
+              const Text('Seleccione un Barbero:', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: selectedBarber,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
+                ),
+                hint: const Text('Elija un barbero'),
+                isExpanded: true,
+                items: barbers.map((String barber) {
+                  return DropdownMenuItem<String>(
+                    value: barber,
+                    child: Text(barber),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedBarber = newValue;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Service Selection
+              const Text('Seleccione un Servicio:', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: selectedService,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
+                ),
+                hint: const Text('Elija un servicio'),
+                isExpanded: true,
+                items: services.map((String service) {
+                  return DropdownMenuItem<String>(
+                    value: service,
+                    child: Text(service),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedService = newValue;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Date Selection
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    selectedDate == null
+                        ? 'Seleccionar Fecha'
+                        : DateFormat('dd-MM-yyyy').format(selectedDate!),
+                     style: const TextStyle(fontSize: 16),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _selectDate(context),
+                    child: const Text('Elegir Fecha'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Time Selection
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    selectedTime == null
+                        ? 'Seleccionar Hora'
+                        : selectedTime!.format(context),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _selectTime(context),
+                    child: const Text('Elegir Hora'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _bookAppointment,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 18),
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Reservar Cita'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
